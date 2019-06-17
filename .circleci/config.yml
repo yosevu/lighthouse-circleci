@@ -12,16 +12,14 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - node-v1-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
 
       - run: yarn install
 
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: node-v1-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
 
       # run tests!
       - run: yarn test
@@ -31,7 +29,7 @@ jobs:
       - run: yarn deploy
   # Run Lighthouse against staging deployment -- anonymous user hitting
   # the app's home page
-  lighthouse:
+  audit:
     # Number of parallel Lighthouse runs against this url. Why more than one?
     # Some perf metrics vary across runs based on backend flakiness, etc, and
     # this way we can extract a best score or median across runs.
@@ -85,6 +83,49 @@ jobs:
           paths:
             - reports
 
+  # Analyze all the reports, decide if we should pass or fail, and
+  # report back with a comment on the PR that provides A) the scores and
+  # B) links to the html reports for all the test runs.
+  processResults:
+    docker:
+      - image: circleci/node:10.15.0
+
+    steps:
+      - checkout
+
+      - run: yarn install
+
+      # (again, or caching strategy around node_modules could probably be
+      # way more optimized, but for now it gets the job done.)
+      # - restore_cache:
+      #     keys:
+      #       - node-v1-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+
+      # Mount the workspace (which contains all our reports) into this
+      # container. The reports are subsequently available at ./reports/
+      - attach_workspace:
+          at: "."
+
+      # Store the html and json reports in S3 as long-term artifacts associated
+      # with this job. Then, we can easily send links to the html reports in the
+      # PR comment.
+      - store_artifacts:
+          path: reports
+          destination: reports
+
+      # Compare our desired goals, expressed in the `lighthouse` section of
+      # `package.json`, against the actual test results. Right now we simply
+      # use the _best score_ across all runs for each category. If we want
+      # to fail the job, and consequently fail the workflow, the script exits
+      # with a nonzero exit code.
+      #
+      # Finally, we post a comment to GH. Because we enabled GH "checks integration"
+      # on the CircleCI side, the PR status will automatically be set to
+      # pass/fail based on whether this workflow passes or fails.
+      - run:
+          name: Analyze and report desired vs actual lighthouse scores
+          command: ./ci-scripts/analyze_scores.js package.json reports
+
 workflows:
   version: 2
   deployAndAudit:
@@ -92,4 +133,7 @@ workflows:
       - deploy
       - audit:
           requires:
-            - build
+            - deploy
+      - processResults:
+          requires:
+            - audit
