@@ -38,7 +38,9 @@ jobs:
     # Sadly there is currently no official lighthouse docker image. But
     # it is on their radar github.com/GoogleChrome/lighthouse/issues/3715
     docker:
-      - image: kporras07/lighthouse-ci
+      # - image: kporras07/lighthouse-ci
+      # - image: klickinc/lighthouse-ci
+      - image: kanti/lighthouse-ci
 
     steps:
       - checkout
@@ -72,7 +74,7 @@ jobs:
           command: |
             lighthouse $TEST_URL \
               --port=9222 \
-              --chrome-flags=\"--headless\" \
+              --chrome-flags="--no-sandbox --headless --disable-gpu" \
               --output-path=/home/chrome/reports/anonymous-"$(echo -n $CIRCLE_SHELL_ENV | md5sum | awk '{print $1}')" \
               --output=json \
               --output=html
