@@ -1,0 +1,67 @@
+version: 2
+jobs:
+  deploy:
+    docker:
+      - image: node:11.10.1
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - node-v1-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - run: yarn install
+      - save_cache:
+          paths:
+            - node_modules
+          key: node-v1-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - run: yarn test
+      - run: yarn build
+      - run: yarn deploy
+  audit:
+    parallelism: 1
+    docker:
+      - image: kanti/lighthouse-ci
+    steps:
+      - checkout
+      - run:
+          name: Run lighthouse
+          environment:
+            TEST_URL: https://lighthouse-circleci.netlify.com/
+          command: |
+            lighthouse $TEST_URL \
+              --port=9222 \
+              --chrome-flags="--no-sandbox --headless --disable-gpu" \
+              --output-path=/home/chrome/reports/"$(echo -n $CIRCLE_SHELL_ENV | md5sum | awk '{print $1}')" \
+              --output=json \
+              --output=html
+      - persist_to_workspace:
+          root: /home/chrome
+          paths:
+            - reports
+  processResults:
+    docker:
+      - image: circleci/node:10.15.0
+
+    steps:
+      - checkout
+      - run: yarn install
+      - attach_workspace:
+          at: "."
+      - store_artifacts:
+          path: reports
+          destination: reports
+      - run:
+          name: Analyze and report desired vs actual lighthouse scores
+          command: ./process-audit-results.js package.json reports
+
+workflows:
+  version: 2
+  deployAndAudit:
+    jobs:
+      - deploy
+      - audit:
+          requires:
+            - deploy
+      - processResults:
+          requires:
+            - audit

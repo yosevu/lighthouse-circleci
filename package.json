@@ -1,0 +1,46 @@
+{
+  "name": "lighthouse-circleci",
+  "url": "https://lighthouse-circleci.netlify.com/",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "circle-github-bot": "^2.0.1",
+    "ramda": "^0.26.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "3.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "deploy": "netlify deploy --dir=./build -p"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "netlify-cli": "^2.11.22"
+  },
+  "lighthouse": {
+    "requiredScores": {
+      "accessibility": 90,
+      "best-practices": 90,
+      "performance": 90,
+      "seo": 90
+    }
+  }
+}
