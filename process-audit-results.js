@@ -1,5 +1,6 @@
 #!/usr/local/bin/node
 
+const bot = require('circle-github-bot');
 const fs = require('fs');
 const path = require('path');
 const R = require('ramda');
@@ -12,7 +13,6 @@ let success = true; // refactor
 // Get reports
 
 const parseFile = file => {
-  console.log({ file });
   return JSON.parse(fs.readFileSync(path.resolve(reportsDir, file), 'utf8'));
 };
 
@@ -28,7 +28,7 @@ const mapFile = (reports, file) => {
 };
 
 const reducedReports = R.reduce(mapFile, {}, fs.readdirSync(reportsDir));
-console.log('Reports', reducedReports);
+console.log('Reports:', reducedReports);
 
 // Add scores
 
@@ -56,12 +56,14 @@ const formatMessage = (score, required) => {
 
 const addMessage = (messages, score) => {
   const required = requiredScores[score[0]];
-  return [...messages, formatMessage(score, required)];
+  const message = formatMessage(score, required);
+  return [...messages, message];
 };
 
 const messages = R.reduce(addMessage, [])(R.toPairs(scores));
-
-console.log(R.join('\n', messages));
+const messageString = R.join('\n', messages);
+console.log(messageString);
+bot.create().comment(process.env.GH_AUTH_TOKEN, messageString);
 
 if (!success) {
   return process.exit(1);
