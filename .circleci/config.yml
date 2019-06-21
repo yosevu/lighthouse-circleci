@@ -52,7 +52,7 @@ jobs:
           destination: reports
       - run:
           name: Analyze and report desired vs actual lighthouse scores
-          command: ./process-results.js package.json reports
+          command: ./.circleci/process-audit-results.js package.json reports
 
 workflows:
   version: 2
