@@ -12,6 +12,7 @@ let success = true; // refactor
 // Get reports
 
 const parseFile = file => {
+  console.log({ file });
   return JSON.parse(fs.readFileSync(path.resolve(reportsDir, file), 'utf8'));
 };
 
@@ -27,6 +28,7 @@ const mapFile = (reports, file) => {
 };
 
 const reducedReports = R.reduce(mapFile, {}, fs.readdirSync(reportsDir));
+console.log('Reports', reducedReports);
 
 // Add scores
 
@@ -41,7 +43,6 @@ const formatMessage = (score, required) => {
   const category = score[0];
   const percent = score[1];
 
-  console.log('score', { percent }, { required }, percent < required);
   if (percent < required) {
     success = false;
   }

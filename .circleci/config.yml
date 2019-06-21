@@ -24,14 +24,14 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run lighthouse against staging deployment
+          name: Run lighthouse
           environment:
             TEST_URL: https://lighthouse-circleci.netlify.com/
           command: |
             lighthouse $TEST_URL \
               --port=9222 \
               --chrome-flags="--no-sandbox --headless --disable-gpu" \
-              --output-path=/home/chrome/reports/anonymous-"$(echo -n $CIRCLE_SHELL_ENV | md5sum | awk '{print $1}')" \
+              --output-path=/home/chrome/reports/"$(echo -n $CIRCLE_SHELL_ENV | md5sum | awk '{print $1}')" \
               --output=json \
               --output=html
       - persist_to_workspace:
