@@ -41,6 +41,7 @@ const formatMessage = (score, required) => {
   const category = score[0];
   const percent = score[1];
 
+  console.log('score', { percent }, { required }, percent < required);
   if (percent < required) {
     success = false;
   }
