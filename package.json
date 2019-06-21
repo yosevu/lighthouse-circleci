@@ -15,7 +15,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "netlify deploy --dir=./build -p"
+    "deploy": "npm run build && netlify deploy --dir=./build -p"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -39,7 +39,7 @@
     "requiredScores": {
       "accessibility": 90,
       "best-practices": 90,
-      "performance": 90,
+      "performance": 95,
       "seo": 90
     }
   }
