@@ -1,5 +1,6 @@
 {
   "name": "lighthouse-circleci",
+  "url": "https://lighthouse-circleci.netlify.com/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -36,10 +37,10 @@
   },
   "lighthouse": {
     "requiredScores": {
-      "accessibility": 100,
-      "best-practices": 100,
-      "performance": 100,
-      "seo": 100
+      "accessibility": 90,
+      "best-practices": 90,
+      "performance": 90,
+      "seo": 90
     }
   }
 }

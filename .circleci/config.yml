@@ -126,7 +126,7 @@ jobs:
       # pass/fail based on whether this workflow passes or fails.
       - run:
           name: Analyze and report desired vs actual lighthouse scores
-          command: ./ci-scripts/analyze_scores.js package.json reports
+          command: ./process-results.js package.json reports
 
 workflows:
   version: 2
